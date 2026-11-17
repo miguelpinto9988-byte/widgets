@@ -34,3 +34,7 @@ Se añadieron cuatro widgets originales y funcionales: **Lanzar moneda**, **Dado
 Los botones **+1** y **Lanzar** del panel Android guardan ahora su resultado por `appWidgetId`: dos paneles del mismo tipo no se pisan entre sí. La primera lectura usa el valor global anterior como base de migración; al retirar un panel se elimina su estado privado. La edición desde la pantalla principal sigue utilizando el dato global del catálogo y **no** modifica automáticamente las instancias ya personalizadas. Los demás modos (notas, listas, fechas) aún comparten datos por tipo; seguimiento en la incidencia #4.
 
 Pruebas propuestas: `WidgetInstanceStateTest` (aislamiento, migración y limpieza), además de los workflows Android CI y emulador. No considerar el cambio listo para publicar hasta que las ejecuciones sean satisfactorias. Referencia técnica: https://developer.android.com/reference/android/appwidget/AppWidgetManager .
+
+## Relojes con zona horaria (en validación)
+
+Los diseños **Zonas horarias** y **Reloj de destino** permiten seleccionar una zona IANA predefinida desde la aplicación; el panel de inicio usa `TextClock` para actualizar la hora sin sondeos. La configuración es persistente por diseño, todavía no por instancia Android. Ver [limitaciones y pruebas](docs/ZONAS_HORARIAS.md). No considerar esta función validada hasta que finalicen las pruebas del PR.
