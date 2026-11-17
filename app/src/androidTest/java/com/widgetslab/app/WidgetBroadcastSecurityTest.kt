@@ -19,11 +19,11 @@ class WidgetBroadcastSecurityTest {
         store.setSelection(invalidWidgetId, "habits")
         val before = store.count("habits")
         try {
-            val intent = Intent(context, HomeWidgetProvider::class.java).apply {
+            val intent = Intent(context, WidgetActionReceiver::class.java).apply {
                 action = "com.widgetslab.app.ADD_ONE"
                 putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, invalidWidgetId)
             }
-            HomeWidgetProvider().onReceive(context, intent)
+            WidgetActionReceiver().onReceive(context, intent)
             assertEquals(before, store.count("habits"))
         } finally {
             store.removeSelection(invalidWidgetId)
