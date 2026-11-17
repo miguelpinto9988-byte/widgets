@@ -43,8 +43,8 @@ class HomeWidgetProvider : AppWidgetProvider() {
 
             views.setTextViewText(R.id.widget_title, spec.title)
             val value = when (spec.mode) {
-                WidgetMode.COUNTER -> "Registro actual: ${store.count(spec.id)}"
-                WidgetMode.RANDOM -> store.text("random_" + spec.id)
+                WidgetMode.COUNTER -> "Registro actual: ${store.instanceCount(widgetId, spec.id)}"
+                WidgetMode.RANDOM -> store.instanceRandom(widgetId, spec.id)
                     .ifBlank { "Pulsa Lanzar para generar un resultado" }
                 WidgetMode.DATE_COUNTDOWN -> WidgetExtras.countdown(store.text("target_" + spec.id))
                 WidgetMode.CHECKLIST -> {
