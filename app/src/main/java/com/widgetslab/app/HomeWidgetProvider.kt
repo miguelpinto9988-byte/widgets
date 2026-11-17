@@ -78,7 +78,7 @@ class HomeWidgetProvider : AppWidgetProvider() {
             // TextClock mantiene la hora en la zona configurada sin alarmas ni servicios.
             if (isClock) {
                 val zone = if (spec.id == "timezones" || spec.id == "destination_clock")
-                    store.clockZone(spec.id) else java.util.TimeZone.getDefault().id
+                    store.instanceClockZone(widgetId, spec.id) else java.util.TimeZone.getDefault().id
                 views.setString(R.id.widget_live_clock, "setTimeZone", zone)
             }
             views.setViewVisibility(R.id.widget_value, if (isClock) View.GONE else View.VISIBLE)
