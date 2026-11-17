@@ -52,6 +52,23 @@ class WidgetStore(context: Context) {
         prefs.edit().putString("list_$id", array.toString()).apply()
     }
 
+    /** Estado separado por instancia; el valor antiguo es la base para migración. */
+    fun instanceCount(widgetId: Int, id: String): Int =
+        prefs.getInt("instance_count_$widgetId", count(id))
+
+    fun incrementInstance(widgetId: Int, id: String, amount: Int = 1): Int {
+        val value = WidgetRules.safeAdd(instanceCount(widgetId, id), amount)
+        prefs.edit().putInt("instance_count_$widgetId", value).apply()
+        return value
+    }
+
+    fun instanceRandom(widgetId: Int, id: String): String =
+        prefs.getString("instance_random_$widgetId", null) ?: text("random_" + id)
+
+    fun saveInstanceRandom(widgetId: Int, value: String) {
+        prefs.edit().putString("instance_random_$widgetId", value.take(4000)).apply()
+    }
+
     fun selection(widgetId: Int): String =
         prefs.getString("selected_$widgetId", "tasks") ?: "tasks"
 
@@ -60,6 +77,10 @@ class WidgetStore(context: Context) {
     }
 
     fun removeSelection(widgetId: Int) {
-        prefs.edit().remove("selected_$widgetId").apply()
+        prefs.edit()
+            .remove("selected_$widgetId")
+            .remove("instance_count_$widgetId")
+            .remove("instance_random_$widgetId")
+            .apply()
     }
 }
