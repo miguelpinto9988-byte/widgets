@@ -11,7 +11,7 @@ class WidgetStore(context: Context) {
 
     fun count(id: String): Int = prefs.getInt("count_$id", 0)
     fun increment(id: String, amount: Int = 1): Int {
-        val value = (count(id) + amount).coerceAtLeast(0)
+        val value = WidgetRules.safeAdd(count(id), amount)
         prefs.edit().putInt("count_$id", value).apply()
         return value
     }

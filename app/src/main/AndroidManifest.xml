@@ -18,6 +18,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <!-- Acciones desde PendingIntent: no accesibles mediante emisiones externas. -->
+        <receiver
+            android:name=".WidgetActionReceiver"
+            android:exported="false" />
         <receiver
             android:name=".HomeWidgetProvider"
             android:exported="true"
