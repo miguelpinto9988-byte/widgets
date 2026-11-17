@@ -1,6 +1,6 @@
 package com.widgetslab.app
 
-enum class WidgetMode { CHECKLIST, NOTE, COUNTER, CLOCK, TIMER, NETWORK, DEVICE, CALENDAR, SHORTCUT, CONVERTER, INTEGRATION }
+enum class WidgetMode { CHECKLIST, NOTE, COUNTER, CLOCK, TIMER, NETWORK, DEVICE, CALENDAR, SHORTCUT, CONVERTER, RANDOM, DATE_COUNTDOWN, INTEGRATION }
 
 data class WidgetSpec(
     val id: String,
@@ -79,7 +79,11 @@ object WidgetCatalog {
         WidgetSpec("large_text", "Panel de texto grande", "Accesibilidad", WidgetMode.NOTE, "Texto local ampliado"),
         WidgetSpec("accessibility", "Accesos accesibles", "Accesibilidad", WidgetMode.SHORTCUT, "Atajos a ajustes Android"),
         WidgetSpec("ai_summary", "Resumen inteligente", "IA", WidgetMode.INTEGRATION, "LLM/backend y consentimiento"),
-        WidgetSpec("ai_study", "Tarjetas de aprendizaje con IA", "IA", WidgetMode.INTEGRATION, "LLM/backend y consentimiento")
+        WidgetSpec("ai_study", "Tarjetas de aprendizaje con IA", "IA", WidgetMode.INTEGRATION, "LLM/backend y consentimiento"),
+        WidgetSpec("coin_flip", "Lanzar moneda", "Juegos", WidgetMode.RANDOM, "Aleatorio local · toca Lanzar"),
+        WidgetSpec("dice_roll", "Dado virtual", "Juegos", WidgetMode.RANDOM, "Aleatorio local de 1 a 6"),
+        WidgetSpec("random_100", "Número al azar", "Juegos", WidgetMode.RANDOM, "Aleatorio local de 1 a 100"),
+        WidgetSpec("date_countdown", "Días para una fecha", "Productividad", WidgetMode.DATE_COUNTDOWN, "Fecha objetivo personalizable (AAAA-MM-DD)")
     )
     fun byId(id: String?): WidgetSpec = all.firstOrNull { it.id == id } ?: all.first()
     val categories: List<String> = listOf("Todas") + all.map { it.category }.distinct()
