@@ -49,6 +49,21 @@ class ClockInstanceZoneTest {
         assertEquals("Europe/Madrid", WidgetStore(context).instanceClockZone(firstId, "timezones"))
     }
 
+    @Test fun editingExistingClockPreservesOtherInstancesAndSelection() {
+        val store = WidgetStore(context)
+        store.setSelection(firstId, "timezones")
+        store.setSelection(secondId, "timezones")
+        assertTrue(store.saveInstanceClockZone(firstId, "timezones", "Asia/Tokyo"))
+        assertTrue(store.saveInstanceClockZone(secondId, "timezones", "Europe/Madrid"))
+        // Reconfiguring a clock reselects the same design before saving its new zone.
+        store.setSelection(firstId, "timezones")
+        assertTrue(store.saveInstanceClockZone(firstId, "timezones", "America/Lima"))
+        val reopened = WidgetStore(context)
+        assertEquals("timezones", reopened.selection(firstId))
+        assertEquals("America/Lima", reopened.instanceClockZone(firstId, "timezones"))
+        assertEquals("Europe/Madrid", reopened.instanceClockZone(secondId, "timezones"))
+    }
+
     @Test fun invalidInstanceOrNonClockDesignCannotStoreZone() {
         val store = WidgetStore(context)
         assertFalse(store.saveInstanceClockZone(-1, "timezones", "UTC"))
