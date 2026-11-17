@@ -11,6 +11,7 @@ import android.os.BatteryManager
 import android.os.Environment
 import android.os.StatFs
 import android.net.Uri
+import android.view.View
 import android.widget.RemoteViews
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -33,16 +34,19 @@ class HomeWidgetProvider : AppWidgetProvider() {
         val appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
             AppWidgetManager.INVALID_APPWIDGET_ID)
         if (appWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) return
+        val manager = AppWidgetManager.getInstance(context)
+        val active = manager.getAppWidgetIds(ComponentName(context, HomeWidgetProvider::class.java))
+        if (!WidgetRules.isRegisteredWidget(appWidgetId, active)) return
         val store = WidgetStore(context)
         val spec = WidgetCatalog.byId(store.selection(appWidgetId))
         when {
             intent.action == ACTION_INCREMENT && spec.mode == WidgetMode.COUNTER -> {
                 store.increment(spec.id)
-                render(context, AppWidgetManager.getInstance(context), appWidgetId)
+                render(context, manager, appWidgetId)
             }
             intent.action == ACTION_RANDOM && spec.mode == WidgetMode.RANDOM -> {
                 store.saveText("random_" + spec.id, WidgetExtras.generate(spec.id))
-                render(context, AppWidgetManager.getInstance(context), appWidgetId)
+                render(context, manager, appWidgetId)
             }
         }
     }
@@ -94,6 +98,12 @@ class HomeWidgetProvider : AppWidgetProvider() {
                 WidgetMode.INTEGRATION -> "Necesita integración con un proveedor externo"
             }
             views.setTextViewText(R.id.widget_value, value)
+            // TextClock se actualiza con Android; una TextView normal solo cambiaba
+            // cada ~30 min, dejando el reloj del escritorio desactualizado.
+            val isClock = spec.mode == WidgetMode.CLOCK
+            views.setViewVisibility(R.id.widget_value, if (isClock) View.GONE else View.VISIBLE)
+            views.setViewVisibility(R.id.widget_live_clock, if (isClock) View.VISIBLE else View.GONE)
+            views.setContentDescription(R.id.widget_value, "${spec.title}: $value")
 
             val openIntent = Intent(context, MainActivity::class.java).apply {
                 putExtra("open_spec", spec.id)
@@ -103,6 +113,7 @@ class HomeWidgetProvider : AppWidgetProvider() {
             val open = PendingIntent.getActivity(context, widgetId, openIntent, flags)
             views.setOnClickPendingIntent(R.id.widget_title, open)
             views.setOnClickPendingIntent(R.id.widget_value, open)
+            views.setOnClickPendingIntent(R.id.widget_live_clock, open)
 
             if (spec.mode == WidgetMode.COUNTER) {
                 val add = Intent(context, HomeWidgetProvider::class.java).apply {
@@ -111,6 +122,7 @@ class HomeWidgetProvider : AppWidgetProvider() {
                     putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
                 }
                 views.setTextViewText(R.id.widget_action, "+1")
+                views.setContentDescription(R.id.widget_action, "Sumar una unidad a ${spec.title}")
                 views.setOnClickPendingIntent(R.id.widget_action,
                     PendingIntent.getBroadcast(context, widgetId, add, flags))
             } else if (spec.mode == WidgetMode.RANDOM) {
@@ -120,10 +132,12 @@ class HomeWidgetProvider : AppWidgetProvider() {
                     putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
                 }
                 views.setTextViewText(R.id.widget_action, "Lanzar")
+                views.setContentDescription(R.id.widget_action, "Generar nuevo resultado: ${spec.title}")
                 views.setOnClickPendingIntent(R.id.widget_action,
                     PendingIntent.getBroadcast(context, widgetId, roll, flags))
             } else {
                 views.setTextViewText(R.id.widget_action, "Abrir")
+                views.setContentDescription(R.id.widget_action, "Abrir ${spec.title}")
                 views.setOnClickPendingIntent(R.id.widget_action, open)
             }
             manager.updateAppWidget(widgetId, views)
