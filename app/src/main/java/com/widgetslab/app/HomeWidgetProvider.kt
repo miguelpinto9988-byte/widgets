@@ -75,6 +75,12 @@ class HomeWidgetProvider : AppWidgetProvider() {
             // TextClock se actualiza con Android; una TextView normal solo cambiaba
             // cada ~30 min, dejando el reloj del escritorio desactualizado.
             val isClock = spec.mode == WidgetMode.CLOCK
+            // TextClock mantiene la hora en la zona configurada sin alarmas ni servicios.
+            if (isClock) {
+                val zone = if (spec.id == "timezones" || spec.id == "destination_clock")
+                    store.clockZone(spec.id) else java.util.TimeZone.getDefault().id
+                views.setString(R.id.widget_live_clock, "setTimeZone", zone)
+            }
             views.setViewVisibility(R.id.widget_value, if (isClock) View.GONE else View.VISIBLE)
             views.setViewVisibility(R.id.widget_live_clock, if (isClock) View.VISIBLE else View.GONE)
             views.setContentDescription(R.id.widget_value, "${spec.title}: $value")
