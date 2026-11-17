@@ -74,6 +74,16 @@ class WidgetStore(context: Context) {
         prefs.edit().putString("instance_random_$widgetId", value.take(4000)).apply()
     }
 
+    /** Zona IANA elegida por tipo; los identificadores desconocidos se rechazan. */
+    fun clockZone(id: String): String =
+        prefs.getString("clock_zone_$id", "UTC")?.takeIf { it in ClockZones.allowed } ?: "UTC"
+
+    fun saveClockZone(id: String, zone: String): Boolean {
+        if (zone !in ClockZones.allowed) return false
+        prefs.edit().putString("clock_zone_$id", zone).apply()
+        return true
+    }
+
     fun selection(widgetId: Int): String =
         prefs.getString("selected_$widgetId", "tasks") ?: "tasks"
 
