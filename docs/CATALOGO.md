@@ -1,6 +1,8 @@
 # Catálogo de widgets (68 conceptos)
 
-La interfaz distingue **Disponible**, **Funcionalidad parcial** y **Requiere integración**. Son parciales: reloj analógico, zonas horarias, reloj de destino, calculadora, pronóstico, calidad del aire, UV, amanecer, Pomodoro, cuenta regresiva, pausas y respiración. Esta clasificación no implica que se hayan completado esas funciones.\n\nCada concepto aparece en la aplicación y puede seleccionarse al añadir **Panel Widgets** al escritorio. **Aparecer en el catálogo no significa tener su integración completa**. Se distinguen las funciones locales, las que requieren permiso, las conectadas a API pública y las pendientes de servicios de terceros.
+La interfaz distingue **Disponible**, **Funcionalidad parcial** y **Requiere integración**. Son parciales: reloj analógico, zonas horarias, reloj de destino, calculadora, pronóstico, calidad del aire, UV, amanecer, Pomodoro, cuenta regresiva, pausas y respiración. Esta clasificación no implica que se hayan completado esas funciones.
+
+Cada concepto aparece en la aplicación y puede seleccionarse al añadir **Panel Widgets** al escritorio. **Aparecer en el catálogo no significa tener su integración completa**. Se distinguen las funciones locales, las que requieren permiso, las conectadas a API pública y las pendientes de servicios de terceros.
 
 | Nº | Nombre | Categoría | Tipo | Estado | Fuente o requisito |
 |---:|---|---|---|---|---|
@@ -67,8 +69,7 @@ La interfaz distingue **Disponible**, **Funcionalidad parcial** y **Requiere int
 | 61 | Panel de texto grande | Accesibilidad | `NOTE` | Local | Texto local ampliado |
 | 62 | Accesos accesibles | Accesibilidad | `SHORTCUT` | Acceso sistema | Atajos a ajustes Android |
 | 63 | Resumen inteligente | IA | `INTEGRATION` | Por integrar | LLM/backend y consentimiento |
-| 68 | Tarjetas de aprendizaje con IA | IA | `INTEGRATION` | Por integrar | LLM/backend y consentimiento |
-
+| 64 | Tarjetas de aprendizaje con IA | IA | `INTEGRATION` | Por integrar | LLM/backend y consentimiento |
 | 65 | Lanzar moneda | Juegos | `RANDOM` | Local | Cara o cruz; botón «Lanzar» desde la app o escritorio |
 | 66 | Dado virtual | Juegos | `RANDOM` | Local | Número 1 a 6; botón «Lanzar» |
 | 67 | Número al azar | Juegos | `RANDOM` | Local | Número 1 a 100; botón «Lanzar» |
