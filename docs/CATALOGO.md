@@ -1,6 +1,6 @@
 # Catálogo de widgets (68 conceptos)
 
-Cada concepto aparece en la aplicación y puede seleccionarse al añadir **Panel Widgets** al escritorio. **Aparecer en el catálogo no significa tener su integración completa**. Se distinguen las funciones locales, las que requieren permiso, las conectadas a API pública y las pendientes de servicios de terceros.
+La interfaz distingue **Disponible**, **Funcionalidad parcial** y **Requiere integración**. Son parciales: reloj analógico, zonas horarias, reloj de destino, calculadora, pronóstico, calidad del aire, UV, amanecer, Pomodoro, cuenta regresiva, pausas y respiración. Esta clasificación no implica que se hayan completado esas funciones.\n\nCada concepto aparece en la aplicación y puede seleccionarse al añadir **Panel Widgets** al escritorio. **Aparecer en el catálogo no significa tener su integración completa**. Se distinguen las funciones locales, las que requieren permiso, las conectadas a API pública y las pendientes de servicios de terceros.
 
 | Nº | Nombre | Categoría | Tipo | Estado | Fuente o requisito |
 |---:|---|---|---|---|---|
