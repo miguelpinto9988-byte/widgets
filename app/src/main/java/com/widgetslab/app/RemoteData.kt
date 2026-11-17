@@ -35,7 +35,7 @@ object RemoteData {
         val (lat, lon) = coordinates(store)
         if (kind == "air_quality") {
             val j = getJson("https://air-quality-api.open-meteo.com/v1/air-quality?latitude=$lat&longitude=$lon&current=european_aqi")
-            val aqi = j.getJSONObject("current").optDouble("european_aqi")
+            val aqi = RemoteValues.requiredNumber(j.getJSONObject("current").optDouble("european_aqi"), 0.0, 500.0, "calidad del aire")
             return "Índice de calidad del aire: ${aqi.toInt()}"
         }
         val args = when(kind) {
@@ -51,28 +51,28 @@ object RemoteData {
                 val dates = daily.getJSONArray("time")
                 val highs = daily.getJSONArray("temperature_2m_max")
                 val lows = daily.getJSONArray("temperature_2m_min")
-                (0 until minOf(5, dates.length())).joinToString(" · ") {
-                    "${dates.getString(it).takeLast(5)}: ${lows.optDouble(it).toInt()}–${highs.optDouble(it).toInt()}°"
+                (0 until minOf(5, dates.length(), highs.length(), lows.length()).also { require(it > 0) { "No hay pronóstico disponible" } }).joinToString(" · ") {
+                    "${dates.getString(it).takeLast(5)}: ${RemoteValues.requiredNumber(lows.optDouble(it), -100.0, 70.0, "mínima").toInt()}–${RemoteValues.requiredNumber(highs.optDouble(it), -100.0, 70.0, "máxima").toInt()}°"
                 }
             }
             "sunrise" -> {
                 val daily = j.getJSONObject("daily")
-                "Salida: ${daily.getJSONArray("sunrise").getString(0).takeLast(5)} · Puesta: ${daily.getJSONArray("sunset").getString(0).takeLast(5)}"
+                "Salida: ${RemoteValues.requiredTime(daily.getJSONArray("sunrise").getString(0))} · Puesta: ${RemoteValues.requiredTime(daily.getJSONArray("sunset").getString(0))}"
             }
             "uv" -> {
                 val valUv = j.getJSONObject("daily").getJSONArray("uv_index_max").optDouble(0)
-                "UV máximo de hoy: ${String.format(Locale.US, "%.1f", valUv)}"
+                "UV máximo de hoy: ${String.format(Locale.US, "%.1f", RemoteValues.requiredNumber(valUv, 0.0, 30.0, "UV"))}"
             }
             else -> {
                 val current = j.getJSONObject("current")
-                "Temperatura: ${current.optDouble("temperature_2m").toInt()} °C · Humedad: ${current.optInt("relative_humidity_2m")}%"
+                "Temperatura: ${RemoteValues.requiredNumber(current.optDouble("temperature_2m"), -100.0, 70.0, "temperatura").toInt()} °C · Humedad: ${RemoteValues.requiredNumber(current.optDouble("relative_humidity_2m"), 0.0, 100.0, "humedad").toInt()}%"
             }
         }
     }
 
     private fun currency(): String {
         val rates = getJson("https://api.frankfurter.dev/v1/latest?base=USD&symbols=EUR").getJSONObject("rates")
-        return "1 USD = ${String.format(Locale.US, "%.4f", rates.getDouble("EUR"))} EUR"
+        return "1 USD = ${String.format(Locale.US, "%.4f", RemoteValues.requiredNumber(rates.getDouble("EUR"), 0.000001, 1000000.0, "tipo de cambio"))} EUR"
     }
 
     private fun getJson(address: String): JSONObject {
@@ -82,7 +82,17 @@ object RemoteData {
             connection.readTimeout = 8000
             connection.setRequestProperty("Accept", "application/json")
             require(connection.responseCode in 200..299) { "Error HTTP ${connection.responseCode}" }
-            JSONObject(connection.inputStream.bufferedReader().use { it.readText() })
+            JSONObject(connection.inputStream.bufferedReader().use { reader ->
+                val result = StringBuilder()
+                val buffer = CharArray(4096)
+                while (true) {
+                    val count = reader.read(buffer)
+                    if (count < 0) break
+                    require(result.length + count <= 262144) { "Respuesta remota demasiado grande" }
+                    result.append(buffer, 0, count)
+                }
+                result.toString()
+            })
         } finally {
             connection.disconnect()
         }
