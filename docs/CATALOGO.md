@@ -1,4 +1,4 @@
-# Catálogo de widgets (64 conceptos)
+# Catálogo de widgets (68 conceptos)
 
 Cada concepto aparece en la aplicación y puede seleccionarse al añadir **Panel Widgets** al escritorio. **Aparecer en el catálogo no significa tener su integración completa**. Se distinguen las funciones locales, las que requieren permiso, las conectadas a API pública y las pendientes de servicios de terceros.
 
@@ -67,11 +67,16 @@ Cada concepto aparece en la aplicación y puede seleccionarse al añadir **Panel
 | 61 | Panel de texto grande | Accesibilidad | `NOTE` | Local | Texto local ampliado |
 | 62 | Accesos accesibles | Accesibilidad | `SHORTCUT` | Acceso sistema | Atajos a ajustes Android |
 | 63 | Resumen inteligente | IA | `INTEGRATION` | Por integrar | LLM/backend y consentimiento |
-| 64 | Tarjetas de aprendizaje con IA | IA | `INTEGRATION` | Por integrar | LLM/backend y consentimiento |
+| 68 | Tarjetas de aprendizaje con IA | IA | `INTEGRATION` | Por integrar | LLM/backend y consentimiento |
+
+| 65 | Lanzar moneda | Juegos | `RANDOM` | Local | Cara o cruz; botón «Lanzar» desde la app o escritorio |
+| 66 | Dado virtual | Juegos | `RANDOM` | Local | Número 1 a 6; botón «Lanzar» |
+| 67 | Número al azar | Juegos | `RANDOM` | Local | Número 1 a 100; botón «Lanzar» |
+| 68 | Días para una fecha | Productividad | `DATE_COUNTDOWN` | Local | Fecha objetivo AAAA-MM-DD y días restantes |
 
 ## Estado por implementación
 
-- **Local:** 26 entradas
+- **Local:** 30 entradas
 - **Con permiso:** 3 entradas
 - **Por integrar:** 23 entradas
 - **API pública:** 6 entradas
@@ -91,3 +96,7 @@ Cada concepto aparece en la aplicación y puede seleccionarse al añadir **Panel
 La app usa una cuadrícula Compose adaptativa `GridCells.Adaptive`. El widget del escritorio admite redimensionamiento horizontal y vertical, sujeto al lanzador Android. Deben probarse teléfonos, tabletas, modo horizontal, texto grande y lectores de pantalla.
 
 Consulta [Integraciones](INTEGRACIONES.md) para permisos y conectores y [Fuentes](FUENTES.md) para documentación técnica.
+
+## Nuevas funciones, 17 de noviembre de 2026
+
+Los nuevos generadores se pueden ejecutar desde el panel del escritorio; el último resultado se guarda en el dispositivo. La fecha objetivo se introduce en formato ISO AAAA-MM-DD. Se calcula la diferencia de días en la zona horaria local en el momento de mostrarla.

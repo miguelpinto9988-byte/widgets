@@ -60,7 +60,7 @@ private fun Picker(onSelect: (WidgetSpec) -> Unit) {
         Text("Selecciona un widget", style = MaterialTheme.typography.headlineSmall)
         Text("Puedes añadir varios paneles y elegir una función distinta en cada uno.")
         OutlinedTextField(query, onValueChange = { query = it },
-            label = { Text("Buscar entre 64") }, modifier = Modifier.fillMaxWidth())
+            label = { Text("Buscar entre 68") }, modifier = Modifier.fillMaxWidth())
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(visible, key = { it.id }) { spec ->
                 ElevatedCard(onClick = { onSelect(spec) },

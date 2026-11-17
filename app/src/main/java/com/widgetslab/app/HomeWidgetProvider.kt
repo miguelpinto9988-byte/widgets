@@ -29,20 +29,27 @@ class HomeWidgetProvider : AppWidgetProvider() {
 
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
-        if (intent.action != ACTION_INCREMENT) return
+        if (intent.action != ACTION_INCREMENT && intent.action != ACTION_RANDOM) return
         val appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
             AppWidgetManager.INVALID_APPWIDGET_ID)
         if (appWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) return
         val store = WidgetStore(context)
         val spec = WidgetCatalog.byId(store.selection(appWidgetId))
-        if (spec.mode == WidgetMode.COUNTER) {
-            store.increment(spec.id)
-            render(context, AppWidgetManager.getInstance(context), appWidgetId)
+        when {
+            intent.action == ACTION_INCREMENT && spec.mode == WidgetMode.COUNTER -> {
+                store.increment(spec.id)
+                render(context, AppWidgetManager.getInstance(context), appWidgetId)
+            }
+            intent.action == ACTION_RANDOM && spec.mode == WidgetMode.RANDOM -> {
+                store.saveText("random_" + spec.id, WidgetExtras.generate(spec.id))
+                render(context, AppWidgetManager.getInstance(context), appWidgetId)
+            }
         }
     }
 
     companion object {
         private const val ACTION_INCREMENT = "com.widgetslab.app.ADD_ONE"
+        private const val ACTION_RANDOM = "com.widgetslab.app.RANDOMIZE"
 
         fun refreshAll(context: Context) {
             val manager = AppWidgetManager.getInstance(context)
@@ -59,6 +66,9 @@ class HomeWidgetProvider : AppWidgetProvider() {
             views.setTextViewText(R.id.widget_title, spec.title)
             val value = when (spec.mode) {
                 WidgetMode.COUNTER -> "Registro actual: ${store.count(spec.id)}"
+                WidgetMode.RANDOM -> store.text("random_" + spec.id)
+                    .ifBlank { "Pulsa Lanzar para generar un resultado" }
+                WidgetMode.DATE_COUNTDOWN -> WidgetExtras.countdown(store.text("target_" + spec.id))
                 WidgetMode.CHECKLIST -> {
                     val items = store.list(spec.id)
                     "${items.count { it.done }} de ${items.size} elementos completados"
@@ -103,6 +113,15 @@ class HomeWidgetProvider : AppWidgetProvider() {
                 views.setTextViewText(R.id.widget_action, "+1")
                 views.setOnClickPendingIntent(R.id.widget_action,
                     PendingIntent.getBroadcast(context, widgetId, add, flags))
+            } else if (spec.mode == WidgetMode.RANDOM) {
+                val roll = Intent(context, HomeWidgetProvider::class.java).apply {
+                    action = ACTION_RANDOM
+                    data = Uri.parse("widgetslab://random/$widgetId")
+                    putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
+                }
+                views.setTextViewText(R.id.widget_action, "Lanzar")
+                views.setOnClickPendingIntent(R.id.widget_action,
+                    PendingIntent.getBroadcast(context, widgetId, roll, flags))
             } else {
                 views.setTextViewText(R.id.widget_action, "Abrir")
                 views.setOnClickPendingIntent(R.id.widget_action, open)
