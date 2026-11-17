@@ -2,6 +2,8 @@ package com.widgetslab.app
 
 enum class WidgetMode { CHECKLIST, NOTE, COUNTER, CLOCK, TIMER, NETWORK, DEVICE, CALENDAR, SHORTCUT, CONVERTER, RANDOM, DATE_COUNTDOWN, INTEGRATION }
 
+enum class WidgetStatus { READY, PARTIAL, REQUIRES_INTEGRATION }
+
 data class WidgetSpec(
     val id: String,
     val title: String,
@@ -9,9 +11,21 @@ data class WidgetSpec(
     val mode: WidgetMode,
     val requirement: String
 ) {
-    val ready: Boolean get() = mode != WidgetMode.INTEGRATION
+    val status: WidgetStatus get() = when {
+        mode == WidgetMode.INTEGRATION -> WidgetStatus.REQUIRES_INTEGRATION
+        id in PARTIAL_WIDGET_IDS -> WidgetStatus.PARTIAL
+        else -> WidgetStatus.READY
+    }
+    val ready: Boolean get() = status == WidgetStatus.READY
     val requiresSetup: Boolean get() = mode == WidgetMode.NETWORK || mode == WidgetMode.CALENDAR || mode == WidgetMode.INTEGRATION
 }
+
+/** Features that currently expose only a subset of their advertised behavior. */
+private val PARTIAL_WIDGET_IDS = setOf(
+    "clock_analog", "timezones", "destination_clock", "calculator",
+    "forecast", "air_quality", "uv", "sunrise", "pomodoro", "countdown",
+    "breaks", "breathing"
+)
 
 /** Catálogo de ideas: cada opción es seleccionable; algunas requieren integración real. */
 object WidgetCatalog {

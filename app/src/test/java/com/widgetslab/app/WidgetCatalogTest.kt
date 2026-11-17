@@ -31,6 +31,20 @@ class WidgetCatalogTest {
         }
     }
 
+    @Test fun incompleteLocalFeaturesAreMarkedPartial() {
+        listOf("clock_analog", "timezones", "destination_clock", "calculator",
+            "forecast", "air_quality", "uv", "sunrise", "pomodoro",
+            "countdown", "breaks", "breathing").forEach { id ->
+            assertEquals("Estado incorrecto: $id", WidgetStatus.PARTIAL, WidgetCatalog.byId(id).status)
+            assertFalse(WidgetCatalog.byId(id).ready)
+        }
+    }
+
+    @Test fun integrationAndWorkingWidgetsHaveExplicitStatus() {
+        assertEquals(WidgetStatus.REQUIRES_INTEGRATION, WidgetCatalog.byId("scores").status)
+        assertEquals(WidgetStatus.READY, WidgetCatalog.byId("coin_flip").status)
+    }
+
     @Test fun unknownIdFallsBackToSafeDefault() {
         assertEquals("tasks", WidgetCatalog.byId("not-a-widget").id)
     }

@@ -122,7 +122,11 @@ private fun WidgetLibrary(initialId: String?) {
                         Text(spec.requirement, style = MaterialTheme.typography.bodySmall,
                             maxLines = 3)
                         Text(
-                            if (spec.ready) "Abrir" else "Requiere integración",
+                            when (spec.status) {
+                                WidgetStatus.READY -> "Disponible"
+                                WidgetStatus.PARTIAL -> "Funcionalidad parcial"
+                                WidgetStatus.REQUIRES_INTEGRATION -> "Requiere integración"
+                            },
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.secondary
                         )
