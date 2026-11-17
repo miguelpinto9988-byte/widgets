@@ -76,3 +76,13 @@ No hay un APK compilado ni firmado en esta entrega. La compatibilidad real debe 
 - Cuenta atrás hasta fecha: objetivo persistente en `SharedPreferences`, formato ISO `AAAA-MM-DD`, cálculo con `LocalDate` y `ChronoUnit`.
 
 El botón `Lanzar` se conecta mediante `PendingIntent.getBroadcast` a `HomeWidgetProvider` y actualiza la instancia correspondiente. Sin permisos adicionales, servicios externos, imágenes de terceros ni marcas de agua.
+
+## Pulido de los widgets de escritorio
+
+- **Relojes:** ahora emplean un `TextClock` Android dentro de `RemoteViews`; la hora de la pantalla de inicio se actualiza con el sistema sin programar sondeos cada minuto. El modo analógico sigue pendiente.
+- **Interacción segura:** los botones «+1» y «Lanzar» utilizan un `PendingIntent` dirigido a `WidgetActionReceiver`, declarado con `android:exported="false"`. El receptor comprueba además que el identificador corresponda a un widget activo antes de modificar datos.
+- **Contadores:** sus operaciones están limitadas entre 0 y `Int.MAX_VALUE` para evitar saltos por desbordamiento de enteros.
+- **Accesibilidad:** etiquetas de acción legibles para lectores de pantalla, botones de 48 dp de altura mínima, títulos hasta dos líneas y altura del panel ajustada al contenido.
+- **Comprobación:** las reglas de seguridad y aritmética disponen de pruebas unitarias; una prueba instrumentada verifica que una acción con ID de widget inexistente no modifica el contador.
+
+Fuentes: [RemoteViews Android](https://developer.android.com/reference/android/widget/RemoteViews) y [TextClock Android](https://developer.android.com/reference/android/widget/TextClock). Los resultados de compilación y emulación se consultan en las ejecuciones de GitHub Actions.
