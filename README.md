@@ -28,3 +28,9 @@ Investigación: [App Widgets Android](https://developer.android.com/develop/ui/v
 ## Widgets nuevos de esta versión
 
 Se añadieron cuatro widgets originales y funcionales: **Lanzar moneda**, **Dado virtual**, **Número al azar (1–100)** y **Días para una fecha**. Los tres primeros tienen acción directa «Lanzar» desde el escritorio Android; la fecha objetivo se guarda dentro de la aplicación y se muestra en el panel del escritorio. Incluyen pruebas unitarias.
+
+### Estado por instancia del escritorio (en validación)
+
+Los botones **+1** y **Lanzar** del panel Android guardan ahora su resultado por `appWidgetId`: dos paneles del mismo tipo no se pisan entre sí. La primera lectura usa el valor global anterior como base de migración; al retirar un panel se elimina su estado privado. La edición desde la pantalla principal sigue utilizando el dato global del catálogo y **no** modifica automáticamente las instancias ya personalizadas. Los demás modos (notas, listas, fechas) aún comparten datos por tipo; seguimiento en la incidencia #4.
+
+Pruebas propuestas: `WidgetInstanceStateTest` (aislamiento, migración y limpieza), además de los workflows Android CI y emulador. No considerar el cambio listo para publicar hasta que las ejecuciones sean satisfactorias. Referencia técnica: https://developer.android.com/reference/android/appwidget/AppWidgetManager .
