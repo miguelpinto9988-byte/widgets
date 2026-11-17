@@ -13,7 +13,8 @@
         android:textStyle="bold"
         android:textSize="17sp"
         android:textColor="#173552"
-        android:maxLines="1" />
+        android:maxLines="2"
+        android:ellipsize="end" />
     <TextView
         android:id="@+id/widget_value"
         android:layout_width="match_parent"
@@ -24,11 +25,23 @@
         android:textColor="#34485B"
         android:maxLines="3"
         android:ellipsize="end" />
+    <!-- TextClock se actualiza con el sistema sin despertadores ni sondeos cada minuto. -->
+    <TextClock
+        android:id="@+id/widget_live_clock"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="gone"
+        android:gravity="center_vertical"
+        android:format12Hour="dd/MM/yyyy  h:mm a"
+        android:format24Hour="dd/MM/yyyy  HH:mm"
+        android:textSize="18sp"
+        android:textColor="#173552" />
     <Button
         android:id="@+id/widget_action"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:minHeight="40dp"
+        android:minHeight="48dp"
         android:textSize="13sp"
         android:textAllCaps="false" />
 </LinearLayout>
