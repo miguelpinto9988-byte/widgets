@@ -90,10 +90,20 @@ class HomeWidgetProvider : AppWidgetProvider() {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             }
             val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            val isEditableClock = spec.id == "timezones" || spec.id == "destination_clock"
+            val clockEditIntent = Intent(context, WidgetConfigureActivity::class.java).apply {
+                putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
+                putExtra(WidgetConfigureActivity.EXTRA_EDIT_CLOCK, true)
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
             val open = PendingIntent.getActivity(context, widgetId, openIntent, flags)
-            views.setOnClickPendingIntent(R.id.widget_title, open)
-            views.setOnClickPendingIntent(R.id.widget_value, open)
-            views.setOnClickPendingIntent(R.id.widget_live_clock, open)
+            val clockEdit = PendingIntent.getActivity(
+                context, widgetId, clockEditIntent, flags
+            )
+            val panelOpen = if (isEditableClock) clockEdit else open
+            views.setOnClickPendingIntent(R.id.widget_title, panelOpen)
+            views.setOnClickPendingIntent(R.id.widget_value, panelOpen)
+            views.setOnClickPendingIntent(R.id.widget_live_clock, panelOpen)
 
             if (spec.mode == WidgetMode.COUNTER) {
                 val add = Intent(context, WidgetActionReceiver::class.java).apply {
@@ -116,9 +126,9 @@ class HomeWidgetProvider : AppWidgetProvider() {
                 views.setOnClickPendingIntent(R.id.widget_action,
                     PendingIntent.getBroadcast(context, widgetId, roll, flags))
             } else {
-                views.setTextViewText(R.id.widget_action, "Abrir")
+                views.setTextViewText(R.id.widget_action, if (isEditableClock) "Zona" else "Abrir")
                 views.setContentDescription(R.id.widget_action, "Abrir ${spec.title}")
-                views.setOnClickPendingIntent(R.id.widget_action, open)
+                views.setOnClickPendingIntent(R.id.widget_action, panelOpen)
             }
             manager.updateAppWidget(widgetId, views)
         }
