@@ -7,10 +7,15 @@ import org.json.JSONObject
 data class ChecklistItem(val title: String, val done: Boolean = false)
 
 class WidgetStore(context: Context) {
+    companion object {
+        // Shared across WidgetStore instances (launcher receiver and Compose activity).
+        private val writeLock = Any()
+    }
+
     private val prefs = context.applicationContext.getSharedPreferences("widgets_data_v1", Context.MODE_PRIVATE)
 
     fun count(id: String): Int = prefs.getInt("count_$id", 0)
-    fun increment(id: String, amount: Int = 1): Int {
+    fun increment(id: String, amount: Int = 1): Int = synchronized(writeLock) {
         val value = WidgetRules.safeAdd(count(id), amount)
         prefs.edit().putInt("count_$id", value).apply()
         return value
@@ -56,7 +61,7 @@ class WidgetStore(context: Context) {
     fun instanceCount(widgetId: Int, id: String): Int =
         prefs.getInt("instance_count_$widgetId", count(id))
 
-    fun incrementInstance(widgetId: Int, id: String, amount: Int = 1): Int {
+    fun incrementInstance(widgetId: Int, id: String, amount: Int = 1): Int = synchronized(writeLock) {
         val value = WidgetRules.safeAdd(instanceCount(widgetId, id), amount)
         prefs.edit().putInt("instance_count_$widgetId", value).apply()
         return value
@@ -72,8 +77,14 @@ class WidgetStore(context: Context) {
     fun selection(widgetId: Int): String =
         prefs.getString("selected_$widgetId", "tasks") ?: "tasks"
 
-    fun setSelection(widgetId: Int, id: String) {
-        prefs.edit().putString("selected_$widgetId", WidgetCatalog.byId(id).id).apply()
+    fun setSelection(widgetId: Int, id: String) = synchronized(writeLock) {
+        val selected = WidgetCatalog.byId(id).id
+        val editor = prefs.edit().putString("selected_$widgetId", selected)
+        if (selection(widgetId) != selected) {
+            // Old counter/roll belongs to a different design, not this selection.
+            editor.remove("instance_count_$widgetId").remove("instance_random_$widgetId")
+        }
+        editor.apply()
     }
 
     fun removeSelection(widgetId: Int) {
