@@ -67,3 +67,12 @@ Desde Android 10 las apps normales no pueden activar/desactivar Wi-Fi directamen
 6. Añadir firma y credenciales de publicación **fuera del repositorio**; generar una distribución antes de darlo por publicado.
 
 No hay un APK compilado ni firmado en esta entrega. La compatibilidad real debe comprobarse compilando el proyecto.
+
+## Cuatro widgets locales adicionales
+
+- Moneda: genera al azar cara o cruz.
+- Dado: genera un entero de 1 a 6.
+- Número aleatorio: genera un entero de 1 a 100.
+- Cuenta atrás hasta fecha: objetivo persistente en `SharedPreferences`, formato ISO `AAAA-MM-DD`, cálculo con `LocalDate` y `ChronoUnit`.
+
+El botón `Lanzar` se conecta mediante `PendingIntent.getBroadcast` a `HomeWidgetProvider` y actualiza la instancia correspondiente. Sin permisos adicionales, servicios externos, imágenes de terceros ni marcas de agua.
