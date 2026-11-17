@@ -27,9 +27,9 @@ class WidgetActionReceiver : BroadcastReceiver() {
         val spec = WidgetCatalog.byId(store.selection(appWidgetId))
         when {
             intent.action == ACTION_INCREMENT && spec.mode == WidgetMode.COUNTER ->
-                store.increment(spec.id)
+                store.incrementInstance(appWidgetId, spec.id)
             intent.action == ACTION_RANDOM && spec.mode == WidgetMode.RANDOM ->
-                store.saveText("random_" + spec.id, WidgetExtras.generate(spec.id))
+                store.saveInstanceRandom(appWidgetId, WidgetExtras.generate(spec.id))
             else -> return
         }
         HomeWidgetProvider.render(context, manager, appWidgetId)
