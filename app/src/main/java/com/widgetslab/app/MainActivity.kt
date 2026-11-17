@@ -241,7 +241,25 @@ private fun WidgetDialog(
                             Button(onClick = { store.saveText(spec.id, note); updated() }) { Text("Guardar") }
                         }
                     }
-                    WidgetMode.CLOCK -> ClockPane()
+                    WidgetMode.CLOCK -> {
+                        if (spec.id == "timezones" || spec.id == "destination_clock") {
+                            var zone by remember(spec.id) { mutableStateOf(store.clockZone(spec.id)) }
+                            Text("Zona horaria del panel: $zone")
+                            ClockZones.allowed.forEach { candidate ->
+                                FilterChip(
+                                    selected = zone == candidate,
+                                    onClick = {
+                                        zone = candidate
+                                        store.saveClockZone(spec.id, candidate)
+                                        updated()
+                                    },
+                                    label = { Text(candidate.replace("_", " ")) }
+                                )
+                            }
+                            Text("La zona se guarda en el dispositivo y el reloj del escritorio se actualiza automáticamente.")
+                        }
+                        ClockPane()
+                    }
                     WidgetMode.TIMER -> TimerPane(spec.id)
                     WidgetMode.CONVERTER -> ConverterPane()
                     WidgetMode.DEVICE -> {
