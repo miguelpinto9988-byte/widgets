@@ -13,3 +13,13 @@ Documentación: https://developer.android.com/reference/android/widget/TextClock
 Al añadir un panel `timezones` o `destination_clock` desde el lanzador, el selector ofrece las 12 zonas IANA disponibles. Cada `appWidgetId` guarda su propia zona, que se aplica a `TextClock` en `HomeWidgetProvider`. La preferencia anterior por diseño se mantiene como respaldo para paneles antiguos sin configuración individual. Al cambiar el diseño o eliminar el panel se elimina su zona individual; al seleccionar de nuevo el mismo diseño se conserva.
 
 No se solicitan permisos nuevos ni se realizan consultas de red. El diálogo dentro de la aplicación continúa modificando la preferencia general por diseño, no las zonas individuales. La verificación en emulador está pendiente hasta completar CI del PR.
+
+## Edición de relojes existentes (PR en validación)
+
+En un panel `timezones` o `destination_clock` ya colocado, pulsa la hora, el título o el botón **Zona** para abrir directamente la selección de zona IANA de esa instancia. La pantalla precarga la zona guardada, conserva el identificador del panel y permite guardar sin eliminarlo ni volver a añadirlo. Al cancelar no modifica las preferencias. Otros tipos de panel mantienen la acción **Abrir**.
+
+La actividad comprueba que el `appWidgetId` pertenezca al proveedor de la aplicación antes de permitir la edición. La selección Compose utiliza `rememberSaveable` para preservar el estado durante recreaciones de pantalla. No se requieren permisos nuevos.
+
+Prueba añadida: `ClockInstanceZoneTest.editingExistingClockPreservesOtherInstancesAndSelection` verifica persistencia e independencia. Falta comprobar en emulador la interacción real con el lanzador y los cambios de tamaño; no anunciar la función como validada hasta que CI y pruebas instrumentadas terminen correctamente.
+
+Referencias: https://developer.android.com/reference/android/appwidget/AppWidgetManager y https://developer.android.com/develop/ui/compose/state-saving .
