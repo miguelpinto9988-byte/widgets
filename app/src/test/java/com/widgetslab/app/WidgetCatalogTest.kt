@@ -6,8 +6,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class WidgetCatalogTest {
-    @Test fun catalogContains64Items() {
-        assertEquals(64, WidgetCatalog.all.size)
+    @Test fun catalogContains68Items() {
+        assertEquals(68, WidgetCatalog.all.size)
     }
 
     @Test fun everyWidgetHasUniqueId() {
@@ -23,6 +23,12 @@ class WidgetCatalogTest {
         assertFalse(WidgetCatalog.byId("ai_summary").ready)
         assertFalse(WidgetCatalog.byId("scores").ready)
         assertTrue(WidgetCatalog.byId("tasks").ready)
+    }
+
+    @Test fun fourNewWidgetsAreAvailable() {
+        listOf("coin_flip", "dice_roll", "random_100", "date_countdown").forEach {
+            assertTrue("Widget no disponible: $it", WidgetCatalog.byId(it).ready)
+        }
     }
 
     @Test fun unknownIdFallsBackToSafeDefault() {
