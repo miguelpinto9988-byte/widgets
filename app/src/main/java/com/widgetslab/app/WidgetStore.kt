@@ -34,20 +34,20 @@ class WidgetStore(context: Context) {
         }
     }.getOrDefault(emptyList())
 
-    fun addItem(id: String, text: String) {
+    fun addItem(id: String, text: String) = synchronized(writeLock) {
         val trimmed = text.trim()
         if (trimmed.isEmpty() || list(id).size >= 100) return
         saveList(id, list(id) + ChecklistItem(trimmed.take(180)))
     }
 
-    fun toggleItem(id: String, index: Int) {
+    fun toggleItem(id: String, index: Int) = synchronized(writeLock) {
         val items = list(id).toMutableList()
         if (index !in items.indices) return
         items[index] = items[index].copy(done = !items[index].done)
         saveList(id, items)
     }
 
-    fun removeItem(id: String, index: Int) {
+    fun removeItem(id: String, index: Int) = synchronized(writeLock) {
         saveList(id, list(id).filterIndexed { i, _ -> i != index })
     }
 
@@ -70,7 +70,7 @@ class WidgetStore(context: Context) {
     fun instanceRandom(widgetId: Int, id: String): String =
         prefs.getString("instance_random_$widgetId", null) ?: text("random_" + id)
 
-    fun saveInstanceRandom(widgetId: Int, value: String) {
+    fun saveInstanceRandom(widgetId: Int, value: String) = synchronized(writeLock) {
         prefs.edit().putString("instance_random_$widgetId", value.take(4000)).apply()
     }
 
@@ -87,7 +87,7 @@ class WidgetStore(context: Context) {
         editor.apply()
     }
 
-    fun removeSelection(widgetId: Int) {
+    fun removeSelection(widgetId: Int) = synchronized(writeLock) {
         prefs.edit()
             .remove("selected_$widgetId")
             .remove("instance_count_$widgetId")
