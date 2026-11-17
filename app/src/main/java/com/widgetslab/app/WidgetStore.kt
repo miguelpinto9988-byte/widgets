@@ -84,6 +84,21 @@ class WidgetStore(context: Context) {
         return true
     }
 
+    /** La zona de cada panel prevalece sobre la preferencia histórica por diseño. */
+    fun instanceClockZone(widgetId: Int, id: String): String {
+        val saved = prefs.getString("instance_clock_zone_$widgetId", null)
+        return saved?.takeIf { it in ClockZones.allowed } ?: clockZone(id)
+    }
+
+    fun saveInstanceClockZone(widgetId: Int, id: String, zone: String): Boolean {
+        if (widgetId < 0 || id !in setOf("timezones", "destination_clock") ||
+            zone !in ClockZones.allowed) return false
+        synchronized(writeLock) {
+            prefs.edit().putString("instance_clock_zone_$widgetId", zone).apply()
+        }
+        return true
+    }
+
     fun selection(widgetId: Int): String =
         prefs.getString("selected_$widgetId", "tasks") ?: "tasks"
 
@@ -93,6 +108,7 @@ class WidgetStore(context: Context) {
         if (selection(widgetId) != selected) {
             // Old counter/roll belongs to a different design, not this selection.
             editor.remove("instance_count_$widgetId").remove("instance_random_$widgetId")
+                .remove("instance_clock_zone_$widgetId")
         }
         editor.apply()
     }
@@ -102,6 +118,7 @@ class WidgetStore(context: Context) {
             .remove("selected_$widgetId")
             .remove("instance_count_$widgetId")
             .remove("instance_random_$widgetId")
+            .remove("instance_clock_zone_$widgetId")
             .apply()
     }
 }
