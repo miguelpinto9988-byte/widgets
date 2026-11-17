@@ -1,7 +1,7 @@
 package com.widgetslab.app
 
 import android.content.Context
-import androidx.test.core.app.ApplicationProvider
+import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -10,7 +10,7 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class WidgetInstanceStateTest {
-    private val context = ApplicationProvider.getApplicationContext<Context>()
+    private val context = InstrumentationRegistry.getInstrumentation().targetContext
     private val prefs = context.getSharedPreferences("widgets_data_v1", Context.MODE_PRIVATE)
     private val first = 9123401
     private val second = 9123402
