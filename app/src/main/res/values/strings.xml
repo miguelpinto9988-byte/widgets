@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Widgets Lab</string>
+    <string name="widget_name">Panel Widgets</string>
+    <string name="widget_description">Panel configurable con una de las 64 funciones del catálogo</string>
+</resources>
