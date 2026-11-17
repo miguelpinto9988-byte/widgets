@@ -92,7 +92,7 @@ private fun WidgetLibrary(initialId: String?) {
 
     Column(Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 12.dp)) {
         Text("Widgets Lab", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-        Text("64 diseños · Android y tabletas · edición local y conectores", style = MaterialTheme.typography.bodyMedium)
+        Text("68 diseños · Android y tabletas · edición local y conectores", style = MaterialTheme.typography.bodyMedium)
         Spacer(Modifier.height(12.dp))
         OutlinedTextField(
             value = search, onValueChange = { search = it },
@@ -203,6 +203,33 @@ private fun WidgetDialog(
                             Button(onClick = { store.increment(spec.id); updated() }) { Text("+ 1") }
                         }
                         Text("Registro manual guardado en este dispositivo.")
+                    }
+                    WidgetMode.RANDOM -> {
+                        val current = version.let { store.text("random_" + spec.id) }
+                        Text(current.ifBlank { "Pulsa para generar un resultado" },
+                            style = MaterialTheme.typography.headlineMedium)
+                        Button(onClick = {
+                            store.saveText("random_" + spec.id, WidgetExtras.generate(spec.id))
+                            updated()
+                        }) { Text("Lanzar") }
+                        Text("El último resultado se conserva en este dispositivo.")
+                    }
+                    WidgetMode.DATE_COUNTDOWN -> {
+                        var target by remember(spec.id) { mutableStateOf(store.text("target_" + spec.id)) }
+                        OutlinedTextField(
+                            value = target, onValueChange = { target = it },
+                            label = { Text("Fecha objetivo (AAAA-MM-DD)") },
+                            modifier = Modifier.fillMaxWidth(), singleLine = true
+                        )
+                        Text(WidgetExtras.countdown(target),
+                            style = MaterialTheme.typography.headlineMedium)
+                        Button(onClick = {
+                            if (runCatching { java.time.LocalDate.parse(target.trim()) }.isSuccess) {
+                                store.saveText("target_" + spec.id, target.trim())
+                                updated()
+                            }
+                        }) { Text("Guardar fecha") }
+                        Text("La pantalla de inicio muestra los días restantes; no necesita Internet.")
                     }
                     WidgetMode.NOTE -> {
                         if (spec.id == "calculator") {
