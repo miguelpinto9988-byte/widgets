@@ -1,0 +1,13 @@
+# Build and local machine files
+.gradle/
+build/
+**/build/
+local.properties
+.idea/
+*.iml
+*.apk
+*.aab
+.DS_Store
+*.keystore
+*.jks
+.env
