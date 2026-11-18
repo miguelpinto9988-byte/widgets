@@ -46,4 +46,38 @@ class ChecklistPayloadBoundsTest {
             prefs.edit().remove("list_$id").commit()
         }
     }
+
+    @Test
+    fun malformedJsonBelowLimitIsPreservedAcrossAllEdits() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val id = "qa_malformed_payload"
+        val prefs = context.getSharedPreferences("widgets_data_v1", 0)
+        val raw = "[{\"title\":\"Incomplete\""
+        try {
+            prefs.edit().putString("list_$id", raw).commit()
+            val store = WidgetStore(context)
+            assertTrue(store.list(id).isEmpty())
+            store.addItem(id, "Nueva tarea")
+            store.toggleItem(id, 0)
+            store.removeItem(id, 0)
+            assertEquals(raw, prefs.getString("list_$id", null))
+        } finally {
+            prefs.edit().remove("list_$id").commit()
+        }
+    }
+
+    @Test
+    fun validEmptyJsonRemainsEditable() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val id = "qa_valid_empty_json"
+        val prefs = context.getSharedPreferences("widgets_data_v1", 0)
+        try {
+            prefs.edit().putString("list_$id", "[]").commit()
+            val store = WidgetStore(context)
+            store.addItem(id, "Recuperada")
+            assertEquals("Recuperada", store.list(id).single().title)
+        } finally {
+            prefs.edit().remove("list_$id").commit()
+        }
+    }
 }

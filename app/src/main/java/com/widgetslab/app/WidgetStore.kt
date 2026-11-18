@@ -46,14 +46,14 @@ class WidgetStore(context: Context) {
 
     fun addItem(id: String, text: String) = synchronized(writeLock) {
         val trimmed = text.trim()
-        if (checklistPayloadTooLarge(id)) return
+        if (checklistPayloadUnreadable(id)) return
         val items = list(id)
         if (trimmed.isEmpty() || items.size >= 100) return
         saveList(id, items + ChecklistItem(trimmed.take(180)))
     }
 
     fun toggleItem(id: String, index: Int) = synchronized(writeLock) {
-        if (checklistPayloadTooLarge(id)) return
+        if (checklistPayloadUnreadable(id)) return
         val items = list(id).toMutableList()
         if (index !in items.indices) return
         items[index] = items[index].copy(done = !items[index].done)
@@ -61,14 +61,18 @@ class WidgetStore(context: Context) {
     }
 
     fun removeItem(id: String, index: Int) = synchronized(writeLock) {
-        if (checklistPayloadTooLarge(id)) return
+        if (checklistPayloadUnreadable(id)) return
         val items = list(id)
         if (index !in items.indices) return
         saveList(id, items.filterIndexed { i, _ -> i != index })
     }
 
-    private fun checklistPayloadTooLarge(id: String): Boolean =
-        (prefs.getString("list_$id", null)?.length ?: 0) > MAX_CHECKLIST_JSON_CHARS
+    /** Do not destroy a stored checklist that cannot be safely decoded. */
+    private fun checklistPayloadUnreadable(id: String): Boolean {
+        val raw = prefs.getString("list_$id", null) ?: return false
+        if (raw.length > MAX_CHECKLIST_JSON_CHARS) return true
+        return runCatching { JSONArray(raw) }.isFailure
+    }
 
     private fun saveList(id: String, items: List<ChecklistItem>) {
         val array = JSONArray()
