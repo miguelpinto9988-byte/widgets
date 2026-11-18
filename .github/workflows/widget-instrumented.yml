@@ -9,8 +9,15 @@ permissions:
 
 jobs:
   widget-emulator:
+    name: Widget tests (${{ matrix.device.name }})
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        device:
+          - { name: phone, profile: pixel_6 }
+          - { name: tablet, profile: pixel_c }
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,13 +38,13 @@ jobs:
             echo "::error::KVM unavailable on runner"
             exit 1
           fi
-      - name: Run existing Android instrumented widget tests
+      - name: Run Android widget instrumentation on ${{ matrix.device.name }}
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 35
           arch: x86_64
           target: google_apis
-          profile: pixel_6
+          profile: ${{ matrix.device.profile }}
           disable-animations: true
           emulator-boot-timeout: 600
           script: gradle :app:connectedDebugAndroidTest --no-daemon --stacktrace
@@ -45,7 +52,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: widget-instrumentation-reports
+          name: widget-instrumentation-${{ matrix.device.name }}
           path: |
             app/build/reports/androidTests/
             app/build/outputs/androidTest-results/
