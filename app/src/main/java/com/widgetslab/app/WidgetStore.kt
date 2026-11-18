@@ -28,9 +28,10 @@ class WidgetStore(context: Context) {
 
     fun list(id: String): List<ChecklistItem> = runCatching {
         val array = JSONArray(prefs.getString("list_$id", "[]"))
-        (0 until array.length()).map { index ->
-            val item = array.getJSONObject(index)
-            ChecklistItem(item.optString("title"), item.optBoolean("done"))
+        (0 until minOf(array.length(), 100)).mapNotNull { index ->
+            val item = array.optJSONObject(index) ?: return@mapNotNull null
+            val title = item.optString("title", "").trim().take(180)
+            if (title.isEmpty()) null else ChecklistItem(title, item.optBoolean("done"))
         }
     }.getOrDefault(emptyList())
 
