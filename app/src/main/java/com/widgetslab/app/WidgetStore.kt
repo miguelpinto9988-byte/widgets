@@ -10,6 +10,8 @@ class WidgetStore(context: Context) {
     companion object {
         // Shared across WidgetStore instances (launcher receiver and Compose activity).
         private val writeLock = Any()
+        // Bound JSON parsing cost before JSONArray allocates objects.
+        private const val MAX_CHECKLIST_JSON_CHARS = 256_000
     }
 
     private val prefs = context.applicationContext.getSharedPreferences("widgets_data_v1", Context.MODE_PRIVATE)
@@ -27,7 +29,9 @@ class WidgetStore(context: Context) {
     }
 
     fun list(id: String): List<ChecklistItem> = runCatching {
-        val array = JSONArray(prefs.getString("list_$id", "[]"))
+        val raw = prefs.getString("list_$id", "[]") ?: "[]"
+        if (raw.length > MAX_CHECKLIST_JSON_CHARS) return emptyList()
+        val array = JSONArray(raw)
         buildList {
             // A corrupt prefix must not hide valid tasks later in the stored list.
             // Cap scanning to bound work on malformed or unexpectedly huge preferences.
@@ -42,12 +46,14 @@ class WidgetStore(context: Context) {
 
     fun addItem(id: String, text: String) = synchronized(writeLock) {
         val trimmed = text.trim()
+        if (checklistPayloadTooLarge(id)) return
         val items = list(id)
         if (trimmed.isEmpty() || items.size >= 100) return
         saveList(id, items + ChecklistItem(trimmed.take(180)))
     }
 
     fun toggleItem(id: String, index: Int) = synchronized(writeLock) {
+        if (checklistPayloadTooLarge(id)) return
         val items = list(id).toMutableList()
         if (index !in items.indices) return
         items[index] = items[index].copy(done = !items[index].done)
@@ -55,10 +61,14 @@ class WidgetStore(context: Context) {
     }
 
     fun removeItem(id: String, index: Int) = synchronized(writeLock) {
+        if (checklistPayloadTooLarge(id)) return
         val items = list(id)
         if (index !in items.indices) return
         saveList(id, items.filterIndexed { i, _ -> i != index })
     }
+
+    private fun checklistPayloadTooLarge(id: String): Boolean =
+        (prefs.getString("list_$id", null)?.length ?: 0) > MAX_CHECKLIST_JSON_CHARS
 
     private fun saveList(id: String, items: List<ChecklistItem>) {
         val array = JSONArray()
