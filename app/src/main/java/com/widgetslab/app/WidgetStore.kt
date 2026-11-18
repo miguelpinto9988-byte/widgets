@@ -28,10 +28,15 @@ class WidgetStore(context: Context) {
 
     fun list(id: String): List<ChecklistItem> = runCatching {
         val array = JSONArray(prefs.getString("list_$id", "[]"))
-        (0 until minOf(array.length(), 100)).mapNotNull { index ->
-            val item = array.optJSONObject(index) ?: return@mapNotNull null
-            val title = item.optString("title", "").trim().take(180)
-            if (title.isEmpty()) null else ChecklistItem(title, item.optBoolean("done"))
+        buildList {
+            // A corrupt prefix must not hide valid tasks later in the stored list.
+            // Cap scanning to bound work on malformed or unexpectedly huge preferences.
+            for (index in 0 until minOf(array.length(), 1000)) {
+                if (size == 100) break
+                val item = array.optJSONObject(index) ?: continue
+                val title = item.optString("title", "").trim().take(180)
+                if (title.isNotEmpty()) add(ChecklistItem(title, item.optBoolean("done")))
+            }
         }
     }.getOrDefault(emptyList())
 
