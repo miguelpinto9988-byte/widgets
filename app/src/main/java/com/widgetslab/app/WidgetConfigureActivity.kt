@@ -2,6 +2,7 @@ package com.widgetslab.app
 
 import android.app.Activity
 import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -22,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -38,10 +40,27 @@ class WidgetConfigureActivity : ComponentActivity() {
             finish()
             return
         }
+        val manager = AppWidgetManager.getInstance(this)
+        val info = manager.getAppWidgetInfo(widgetId)
+        if (info?.provider != ComponentName(this, HomeWidgetProvider::class.java)) {
+            finish()
+            return
+        }
+        val store = WidgetStore(this)
+        val editing = intent?.getBooleanExtra(EXTRA_EDIT_CLOCK, false) == true
+        val current = store.selection(widgetId)
+        val editableClock = editing && current in setOf("timezones", "destination_clock")
+        if (editing && !editableClock) {
+            finish()
+            return
+        }
         setContent {
             MaterialTheme {
-                Picker { spec, zone ->
-                    val store = WidgetStore(this)
+                Picker(
+                    initialClockId = if (editableClock) current else null,
+                    initialZone = if (editableClock) store.instanceClockZone(widgetId, current) else "UTC",
+                    onCancel = { finish() }
+                ) { spec, zone ->
                     store.setSelection(widgetId, spec.id)
                     if (zone != null) store.saveInstanceClockZone(widgetId, spec.id, zone)
                     HomeWidgetProvider.render(this, AppWidgetManager.getInstance(this), widgetId)
@@ -52,13 +71,19 @@ class WidgetConfigureActivity : ComponentActivity() {
             }
         }
     }
+
+    companion object {
+        const val EXTRA_EDIT_CLOCK = "com.widgetslab.app.EDIT_CLOCK"
+    }
 }
 
 @Composable
-private fun Picker(onSelect: (WidgetSpec, String?) -> Unit) {
-    var clockSpec by remember { mutableStateOf<WidgetSpec?>(null) }
-    var chosenZone by remember { mutableStateOf("UTC") }
-    var query by remember { mutableStateOf("") }
+private fun Picker(initialClockId: String?, initialZone: String,
+                   onCancel: () -> Unit, onSelect: (WidgetSpec, String?) -> Unit) {
+    var clockId by rememberSaveable { mutableStateOf(initialClockId) }
+    var chosenZone by rememberSaveable { mutableStateOf(initialZone) }
+    var query by rememberSaveable { mutableStateOf("") }
+    val clockSpec = clockId?.let(WidgetCatalog::byId)
     val visible = WidgetCatalog.all.filter { it.title.contains(query, ignoreCase = true)
         || it.category.contains(query, ignoreCase = true) }
     if (clockSpec != null) {
@@ -75,9 +100,9 @@ private fun Picker(onSelect: (WidgetSpec, String?) -> Unit) {
                     }
                 }
             }
-            Button(onClick = { onSelect(clockSpec!!, chosenZone) },
-                modifier = Modifier.fillMaxWidth()) { Text("Añadir reloj") }
-            Button(onClick = { clockSpec = null }) { Text("Volver") }
+            Button(onClick = { onSelect(clockSpec, chosenZone) },
+                modifier = Modifier.fillMaxWidth()) { Text(if (initialClockId != null) "Guardar zona" else "Añadir reloj") }
+            Button(onClick = { if (initialClockId != null) onCancel() else clockId = null }) { Text("Volver") }
         }
         return
     }
@@ -90,7 +115,7 @@ private fun Picker(onSelect: (WidgetSpec, String?) -> Unit) {
             items(visible, key = { it.id }) { spec ->
                 ElevatedCard(onClick = {
                     if (spec.id == "timezones" || spec.id == "destination_clock") {
-                        clockSpec = spec
+                        clockId = spec.id
                     } else onSelect(spec, null)
                 },
                     modifier = Modifier.fillMaxWidth()) {
