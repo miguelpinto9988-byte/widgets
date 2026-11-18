@@ -28,9 +28,12 @@ class WidgetStore(context: Context) {
         prefs.edit().putString("text_$id", value.take(4000)).apply()
     }
 
-    fun list(id: String): List<ChecklistItem> = runCatching {
+    fun list(id: String): List<ChecklistItem> = readChecklist(id) ?: emptyList()
+
+    /** Unreadable data must not be overwritten by a widget action. */
+    private fun readChecklist(id: String): List<ChecklistItem>? = runCatching {
         val raw = prefs.getString("list_$id", "[]") ?: "[]"
-        if (raw.length > MAX_CHECKLIST_JSON_CHARS) return emptyList()
+        if (raw.length > MAX_CHECKLIST_JSON_CHARS) return null
         val array = JSONArray(raw)
         buildList {
             // A corrupt prefix must not hide valid tasks later in the stored list.
@@ -42,33 +45,27 @@ class WidgetStore(context: Context) {
                 if (title.isNotEmpty()) add(ChecklistItem(title, item.optBoolean("done")))
             }
         }
-    }.getOrDefault(emptyList())
+    }.getOrNull()
 
     fun addItem(id: String, text: String) = synchronized(writeLock) {
         val trimmed = text.trim()
-        if (checklistPayloadTooLarge(id)) return
-        val items = list(id)
+        val items = readChecklist(id) ?: return
         if (trimmed.isEmpty() || items.size >= 100) return
         saveList(id, items + ChecklistItem(trimmed.take(180)))
     }
 
     fun toggleItem(id: String, index: Int) = synchronized(writeLock) {
-        if (checklistPayloadTooLarge(id)) return
-        val items = list(id).toMutableList()
+        val items = (readChecklist(id) ?: return).toMutableList()
         if (index !in items.indices) return
         items[index] = items[index].copy(done = !items[index].done)
         saveList(id, items)
     }
 
     fun removeItem(id: String, index: Int) = synchronized(writeLock) {
-        if (checklistPayloadTooLarge(id)) return
-        val items = list(id)
+        val items = readChecklist(id) ?: return
         if (index !in items.indices) return
         saveList(id, items.filterIndexed { i, _ -> i != index })
     }
-
-    private fun checklistPayloadTooLarge(id: String): Boolean =
-        (prefs.getString("list_$id", null)?.length ?: 0) > MAX_CHECKLIST_JSON_CHARS
 
     private fun saveList(id: String, items: List<ChecklistItem>) {
         val array = JSONArray()
