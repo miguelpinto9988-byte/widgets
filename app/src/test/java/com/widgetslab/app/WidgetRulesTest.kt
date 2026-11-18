@@ -21,6 +21,21 @@ class WidgetRulesTest {
         assertEquals(9, WidgetRules.safeAdd(10, -1))
     }
 
+    @Test fun actionTargetsMustMatchExactPanelAndOperation() {
+        val increment = WidgetActionReceiver.ACTION_INCREMENT
+        val random = WidgetActionReceiver.ACTION_RANDOM
+        assertTrue(WidgetRules.matchesActionTarget(increment, "widgetslab://counter/42", 42))
+        assertTrue(WidgetRules.matchesActionTarget(random, "widgetslab://random/42", 42))
+        assertFalse(WidgetRules.matchesActionTarget(increment, null, 42))
+        assertFalse(WidgetRules.matchesActionTarget(increment, "widgetslab://counter/43", 42))
+        assertFalse(WidgetRules.matchesActionTarget(increment, "widgetslab://random/42", 42))
+        assertFalse(WidgetRules.matchesActionTarget(random, "widgetslab://counter/42", 42))
+        assertFalse(WidgetRules.matchesActionTarget(increment, "widgetslab://counter/042", 42))
+        assertFalse(WidgetRules.matchesActionTarget(increment, "widgetslab://counter/42?extra=1", 42))
+        assertFalse(WidgetRules.matchesActionTarget(increment, "widgetslab://counter/42", -1))
+        assertFalse(WidgetRules.matchesActionTarget("unknown", "widgetslab://counter/42", 42))
+    }
+
     @Test fun actionsRequireRegisteredWidgetId() {
         val active = intArrayOf(3, 7, 12)
         assertTrue(WidgetRules.isRegisteredWidget(7, active))
