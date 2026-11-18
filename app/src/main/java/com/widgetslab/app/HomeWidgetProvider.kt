@@ -87,7 +87,7 @@ class HomeWidgetProvider : AppWidgetProvider() {
 
             val openIntent = Intent(context, MainActivity::class.java).apply {
                 putExtra("open_spec", spec.id)
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                this.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             }
             val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             val isEditableClock = spec.id == "timezones" || spec.id == "destination_clock"
