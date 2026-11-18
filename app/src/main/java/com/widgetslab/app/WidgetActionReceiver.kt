@@ -17,6 +17,8 @@ class WidgetActionReceiver : BroadcastReceiver() {
         val appWidgetId = intent.getIntExtra(
             AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID
         )
+        // An action must retain the exact immutable target URI created for this panel.
+        if (!WidgetRules.matchesActionTarget(intent.action, intent.dataString, appWidgetId)) return
         val manager = AppWidgetManager.getInstance(context)
         val registered = manager.getAppWidgetIds(
             ComponentName(context, HomeWidgetProvider::class.java)
