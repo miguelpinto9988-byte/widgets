@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import kotlin.random.Random
 
-/** Reglas puras y comprobables de los nuevos widgets; no necesitan Internet. */
+/** Reglas puras y comprobables para widgets locales; no necesitan Internet. */
 object WidgetExtras {
     fun generate(id: String, random: Random = Random.Default): String = when (id) {
         "coin_flip" -> if (random.nextBoolean()) "Cara" else "Cruz"
@@ -18,8 +18,10 @@ object WidgetExtras {
             ?: return "Configura una fecha (AAAA-MM-DD)"
         val days = ChronoUnit.DAYS.between(today, date)
         return when {
-            days > 0 -> "Faltan $days días"
+            days > 1 -> "Faltan $days días"
+            days == 1L -> "Falta 1 día"
             days == 0L -> "¡Es hoy!"
+            days == -1L -> "Hace 1 día"
             else -> "Hace ${-days} días"
         }
     }
