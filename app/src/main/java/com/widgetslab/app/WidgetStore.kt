@@ -42,8 +42,9 @@ class WidgetStore(context: Context) {
 
     fun addItem(id: String, text: String) = synchronized(writeLock) {
         val trimmed = text.trim()
-        if (trimmed.isEmpty() || list(id).size >= 100) return
-        saveList(id, list(id) + ChecklistItem(trimmed.take(180)))
+        val items = list(id)
+        if (trimmed.isEmpty() || items.size >= 100) return
+        saveList(id, items + ChecklistItem(trimmed.take(180)))
     }
 
     fun toggleItem(id: String, index: Int) = synchronized(writeLock) {
@@ -54,7 +55,9 @@ class WidgetStore(context: Context) {
     }
 
     fun removeItem(id: String, index: Int) = synchronized(writeLock) {
-        saveList(id, list(id).filterIndexed { i, _ -> i != index })
+        val items = list(id)
+        if (index !in items.indices) return
+        saveList(id, items.filterIndexed { i, _ -> i != index })
     }
 
     private fun saveList(id: String, items: List<ChecklistItem>) {
